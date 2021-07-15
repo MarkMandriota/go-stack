@@ -31,6 +31,14 @@ func NewStack(f uint32) *Frame {
 	return &Frame{Flag: f}
 }
 
+// Len - returns len of current frame + len of prev frame.
+func (f *Frame) Len() int {
+	if f.Prev != nil {
+		return int(f.cp+f.Prev.cp)
+	}
+	return int(f.cp)
+}
+
 // Ret - returns to n frames.
 // This can be used to clear and allocate memory.
 func (f *Frame) Ret(n uint64) *Frame {
@@ -55,13 +63,13 @@ func (f *Frame) Add(src interface{}) *Frame {
 	if f.cp < uint32(len(f.bf)) {
 		f.bf[f.cp] = src
 		f.cp++
-		return f
-	}
-
-	if f.Next != nil {
+	} else if f.Next == nil {
+		f.Next = &Frame{Flag: f.Flag, cp: 1, bf: Buffer{src}, Prev: f}
+	} else {
 		return f.Next.Add(src)
 	}
-	return &Frame{bf: Buffer{src}, Prev: f}
+
+	return f
 }
 
 // Sub - Popes value from stack to dst. Panics if cannot assign value to dst.
