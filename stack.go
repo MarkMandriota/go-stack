@@ -43,7 +43,10 @@ func (f *Frame) Len() int {
 // This can be used to clear and allocate memory.
 func (f *Frame) Ret(n uint64) *Frame {
 	for i := n; i > 0; i-- {
-		f.Prev = &Frame{Flag: f.Flag, Next: f}
+		if f.Prev == nil {
+			f.Prev = &Frame{Flag: f.Flag, Next: f}
+		}
+		f.Prev.cp = 0
 		f = f.Prev
 	}
 
